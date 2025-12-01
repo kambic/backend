@@ -1,0 +1,37 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "dash>=3.3.0",
+    "django>=5.2.8",
+    "django-extensions>=4.1",
+    "django-filter>=25.2",
+    "django-import-export>=4.3.14",
+    "djangorestframework>=3.16.1",
+    "lxml>=6.0.2",
+    "notebook>=7.5.0",
+    "pandas>=2.3.3",
+    "pandas-stubs==2.3.3.251201",
+    "pillow>=11.3.0",
+    "streamlit>=1.51.0",
+    "vidra-kit",
+]
+
+[tool.uv.workspace]
+members = [
+    "vidra-kit",
+]
+
+[tool.uv.sources]
+vidra-kit = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "dash>=3.3.0",
+    "faker>=38.2.0",
+    "matplotlib>=3.10.7",
+    "pandas>=2.3.3",
+    "plotly>=6.5.0",
+]
