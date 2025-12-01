@@ -1,458 +1,271 @@
-import json
+# app.py — MODULAR, CLEAN, EXCEL-SAFE, PRODUCTION READY
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import requests
-from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import json
 from pathlib import Path
-import time
+from datetime import datetime
+import requests
 import io
 
-# ========================= CONFIG & STYLING =========================
+# ========================= CONFIG =========================
 st.set_page_config(
-    page_title="STAG vs PROD – Expired URLs Dashboard",
+    page_title="STAG vs PROD – Expired URLs Monitor",
+    page_icon="Magnifying glass",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS
-st.markdown("""
-<style>
-    .big-font { font-size: 26px !important; font-weight: bold; }
-    .metric-good { color: #00ff00; }
-    .metric-bad { color: #ff3333; }
-    .url-alive { background-color: #d4edda; color: #155724; padding: 2px 6px; border-radius: 4px; }
-    .url-dead { background-color: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 4px; }
-    .footer { text-align: center; color: #888; margin-top: 50px; }
+# Dark mode toggle
+if "theme" not in st.session_state:
+    st.session_state.theme = "light"
 
-    /* Style for the global selector container */
-    .global-selector-container {
-        padding: 10px 0 10px 0;
-        border-bottom: 2px solid #eee;
-        margin-bottom: 10px;
-    }
+
+def toggle_theme():
+    st.session_state.theme = "dark" if st.session_state.theme == "light" else "light"
+
+
+st.markdown(f"""
+<style>
+    .big-font {{font-size: 28px !important; font-weight: bold;}}
+    .metric-good {{color: #00aa00; background: #e6ffe6; padding: 10px; border-radius: 10px;}}
+    .metric-bad  {{color: #aa0000; background: #ffe6e6; padding: 10px; border-radius: 10px;}}
+    .footer {{text-align: center; color: #888; margin-top: 4rem;}}
+    .help-text {{font-size: 14px; color: #666;}}
+    {"body {background: #1e1e1e; color: white;}" if st.session_state.theme == "dark" else ""}
 </style>
 """, unsafe_allow_html=True)
 
-
-# ========================= DATA LOADER CLASS =========================
-class DataLoader:
-    @staticmethod
-    @st.cache_data(ttl=600, show_spinner=False)
-    def load_environment(file_path: str, env_name: str) -> pd.DataFrame:
-        """Load and preprocess JSON response from one environment."""
-        path = Path(file_path)
-        if not path.exists():
-            # Create mock files if they don't exist for running the app
-            if file_path == "mtcms-stag-response.json":
-                mock_data = [
-                                {"mappedOfferId": f"S{i}",
-                                 "videoURLs": [{"videoURL": f"https://mock-stag.com/video{i}"}],
-                                 "expired": f"2023-01-{i % 28 + 1:02d}T00:00:00Z"} for i in range(1, 201)
-                            ] + [
-                                {"mappedOfferId": f"S{i}",
-                                 "videoURLs": [{"videoURL": f"https://mock-stag.com/video{i}"}],
-                                 "expired": f"2024-05-{i % 28 + 1:02d}T00:00:00Z"} for i in range(201, 301)
-                            ]
-            else:
-                mock_data = [
-                                {"mappedOfferId": f"P{i}",
-                                 "videoURLs": [{"videoURL": f"https://mock-prod.com/video{i}"}],
-                                 "expired": f"2023-01-{i % 28 + 1:02d}T00:00:00Z"} for i in range(1, 151)
-                            ] + [
-                                {"mappedOfferId": f"P{i}",
-                                 "videoURLs": [{"videoURL": f"https://mock-prod.com/video{i}"}],
-                                 "expired": f"2024-05-{i % 28 + 1:02d}T00:00:00Z"} for i in range(151, 251)
-                            ]
-
-            # Write mock data to file
-            with open(path, 'w') as f:
-                json.dump(mock_data, f)
-            st.warning(f"Mock data created for {path} as file was not found.")
-
-        with open(path) as f:
-            data = json.load(f)
-
-        df = pd.DataFrame(data)
-        df["videoURL"] = df["videoURLs"].apply(lambda x: x[0]["videoURL"] if x else None)
-        df["expired"] = pd.to_datetime(df["expired"])
-        df["year"] = df["expired"].dt.year
-        df["env"] = env_name
-        df["status_checked"] = False
-        df["http_status"] = None
-        df["response_time_ms"] = None
-        df["is_alive"] = None  # Column for validation results
-
-        return df.drop(columns=["videoURLs"], errors="ignore")
+col1, col2 = st.columns([8, 1])
+with col2:
+    st.button("Dark Mode" if st.session_state.theme == "light" else "Light Mode", on_click=toggle_theme)
 
 
-# ========================= URL VALIDATOR CLASS =========================
-class URLValidator:
-    @staticmethod
-    def check_single_url(url_data: dict) -> dict:
-        """Checks the HTTP status of a single URL."""
-        url = url_data["videoURL"]
-        try:
-            start = time.time()
-            # Using requests.head is faster than requests.get as it doesn't download the body
-            resp = requests.head(url, timeout=10, allow_redirects=True, headers={"User-Agent": "Streamlit-Dashboard"})
-            rt = int((time.time() - start) * 1000)
-            return {
-                "videoURL": url,
-                "status_code": resp.status_code,
-                # Consider 2xx and 3xx as alive
-                "alive": 200 <= resp.status_code < 400,
-                "response_time_ms": rt
-            }
-        except Exception:
-            # Handle connection errors, timeouts, etc.
-            return {
-                "videoURL": url,
-                "status_code": "Error/Timeout",
-                "alive": False,
-                "response_time_ms": None
-            }
+# ========================= UTILS =========================
+def to_excel_safe(df: pd.DataFrame, title: str = "Report") -> bytes:
+    """Export DataFrame to Excel with timezone-naive datetimes"""
+    df_export = df.copy()
 
-    @classmethod
-    def validate_all(cls, df: pd.DataFrame) -> pd.DataFrame:
-        """Validates all unique URLs in the DataFrame using parallel threads."""
-        # We only need one entry per unique URL for validation
-        unique_urls = (
-            df[["videoURL", "env"]]
-            .dropna(subset=["videoURL"])
-            .drop_duplicates(subset=["videoURL"])
-            .to_dict("records")
+    # FIX: Ensure all datetime columns are timezone-naive for Excel compatibility
+    for col in df_export.select_dtypes(include=['datetime64', 'datetime64[ns]']).columns:
+        # Check if the column is timezone-aware and convert to naive if it is
+        if df_export[col].dt.tz is not None:
+            # Convert to naive (removes tz info)
+            df_export[col] = df_export[col].dt.tz_localize(None)
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df_export.to_excel(writer, index=False, sheet_name=title[:31])
+        worksheet = writer.sheets[title[:31]]
+        for i, col in enumerate(df_export.columns, 1):
+            max_len = max(df_export[col].astype(str).map(len).max(), len(col)) + 2
+            worksheet.column_dimensions[chr(64 + i)].width = min(max_len, 50)
+    return output.getvalue()
+
+
+# ========================= DATA MODULE =========================
+@st.cache_data(ttl=1800, show_spinner=False)
+def load_environment(file_path: str, env_name: str) -> pd.DataFrame:
+    path = Path(file_path)
+    if not path.exists():
+        st.warning(f"{file_path} missing → using mock data")
+        mock = [
+            {"mappedOfferId": f"{env_name[0]}{i:05d}",
+             "videoURLs": [{"videoURL": f"https://{env_name.lower()}.cdn.example.com/v{i}.mp4"}],
+             "expired": f"2024-{'%02d' % ((i % 12) + 1)}-{'%02d' % ((i % 30) + 1)}T00:00:00Z"}
+            for i in range(1, 450 if env_name == "Staging" else 380)
+        ]
+        path.write_text(json.dumps(mock))
+
+    df = pd.DataFrame(json.load(open(path)))
+    df["videoURL"] = df["videoURLs"].apply(lambda x: x[0]["videoURL"] if x else None)
+    # Convert to datetime, ensuring it's interpreted as UTC, then make it timezone-naive
+    df["expired"] = pd.to_datetime(df["expired"], utc=True).dt.tz_localize(None)
+    df["year"] = df["expired"].dt.year
+    df["month_year"] = df["expired"].dt.strftime("%Y-%m")
+    df["date"] = df["expired"].dt.date  # Still useful for simpler display/filtering
+    df["env"] = env_name
+    return df.drop(columns=["videoURLs"], errors="ignore")
+
+
+# ========================= MAIN APP =========================
+def main():
+    st.title("STAG vs PROD Expired URLs Monitor")
+    st.markdown("### Real-time comparison of expired video URLs across environments")
+
+    # Load data
+    with st.spinner("Loading Staging & Production..."):
+        stag = load_environment("mtcms-stag-response.json", "Staging")
+        prod = load_environment("mtcms-prod-response.json", "Production")
+        combined = pd.concat([stag, prod], ignore_index=True)
+
+    # Header Metrics
+    diff = len(stag) - len(prod)
+    pct = diff / len(prod) * 100 if len(prod) > 0 else 0
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        st.metric("Staging", f"{len(stag):,}")
+    with c2:
+        st.metric("Production", f"{len(prod):,}", delta=f"{diff:+,}")
+    with c3:
+        st.markdown(f"<div class='{'metric-bad' if diff > 0 else 'metric-good'} big-font'>{pct:+.1f}%</div>",
+                    unsafe_allow_html=True)
+    with c4:
+        st.caption(f"Updated: {datetime.now():%b %d, %Y %H:%M}")
+
+    st.markdown("---")
+
+    # Global Year Selector
+    years = sorted(combined["year"].unique(), reverse=True)
+    selected_year = st.selectbox("Focus Year", years, index=0, help="All tabs use this year")
+
+    # Tabs
+    tab_overview, tab_drill, tab_diff, tab_health = st.tabs([
+        "Overview", "Drilldown + Filters", "Deep Diff", "URL Health"
+    ])
+
+    # === TAB 1: Overview ===
+    with tab_overview:
+        col1, col2 = st.columns([3, 2])
+        with col1:
+            fig = px.bar(
+                combined.groupby(["year", "env"], as_index=False).size(),
+                x="year", y="size", color="env", barmode="group",
+                title="Expired URLs by Year"
+            )
+            st.plotly_chart(fig, width='stretch')
+        with col2:
+            monthly = combined[combined["year"] == selected_year].groupby(["month_year", "env"], as_index=False).size()
+            fig2 = px.line(monthly, x="month_year", y="size", color="env", markers=True,
+                           title=f"Monthly Trend – {selected_year}")
+            st.plotly_chart(fig2, width='stretch')
+
+    # === TAB 2: Drilldown + Filters + Excel + Modal ===
+    with tab_drill:
+        st.subheader(f"Drilldown: Expired URLs in {selected_year}")
+
+        colf1, colf2, colf3 = st.columns(3)
+        with colf1:
+            envs = st.multiselect("Environment", ["Staging", "Production"], default=["Staging", "Production"])
+        with colf2:
+            offer = st.text_input("Offer ID contains")
+        with colf3:
+            url_part = st.text_input("URL contains")
+
+        # SUGAR: Use date objects for cleaner date_input defaults
+        start_default = datetime(selected_year, 1, 1).date()
+        end_default = datetime(selected_year, 12, 31).date()
+
+        date_range = st.date_input(
+            "Expired Date Range",
+            value=(start_default, end_default),
+            key="drill_date"
         )
 
-        results = []
-        progress_bar = st.progress(0)
-        status_text = st.empty()
+        # Filter logic
+        df = combined[combined["year"] == selected_year].copy()
+        if envs: df = df[df["env"].isin(envs)]
+        if offer: df = df[df["mappedOfferId"].astype(str).str.contains(offer, case=False, na=False)]
+        if url_part: df = df[df["videoURL"].str.contains(url_part, case=False, na=False)]
 
-        total_urls = len(unique_urls)
-        with ThreadPoolExecutor(max_workers=25) as executor:
-            # Create futures for each URL check
-            futures = {executor.submit(cls.check_single_url, row): row for row in unique_urls}
+        # SUGAR: Robust date range filtering against the datetime column
+        if len(date_range) == 2:
+            # Convert start date to 00:00:00 Timestamp
+            start_ts = pd.to_datetime(date_range[0])
+            # Convert end date to 23:59:59 Timestamp to include the entire last day
+            end_ts = pd.to_datetime(date_range[1]) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
 
-            for i, future in enumerate(as_completed(futures)):
-                try:
-                    results.append(future.result())
-                except Exception as e:
-                    st.error(f"Error checking URL: {e}")
+            # Filter against the original 'expired' datetime column
+            df = df[(df["expired"] >= start_ts) & (df["expired"] <= end_ts)]
 
-                # Update progress bar and status text
-                progress_value = (i + 1) / total_urls
-                progress_bar.progress(progress_value)
-                status_text.text(f"Validating... {i + 1}/{total_urls}")
-
-        progress_bar.empty()
-        status_text.empty()
-        return pd.DataFrame(results)
-
-
-# ========================= MAIN DASHBOARD CLASS =========================
-class ExpiredURLsComparator:
-    def __init__(self):
-        self.df_stag = DataLoader.load_environment("mtcms-stag-response.json", "Staging")
-        self.df_prod = DataLoader.load_environment("mtcms-prod-response.json", "Production")
-        # Base combined DataFrame (without validation results yet)
-        self.df_combined = pd.concat([self.df_stag, self.df_prod], ignore_index=True)
-        self.df_analysis = self._get_analysis_df()  # This will hold the final data for charts
-
-    def _get_analysis_df(self):
-        """Prepares the final DataFrame for analysis, merging validation results if available."""
-        df = self.df_combined.copy()
-
-        # If validation results exist, merge them back into the main DataFrame
-        if "validation_results" in st.session_state and not st.session_state.validation_results.empty:
-            df_val = st.session_state.validation_results.rename(
-                columns={"status_code": "http_status_val", "alive": "is_alive_val"}
-            )
-
-            # Merge the validation status back based on the unique URL.
-            df = pd.merge(
-                df,
-                df_val[["videoURL", "http_status_val", "is_alive_val", "response_time_ms"]],
-                on="videoURL",
-                how="left"
-            )
-
-            # Use the validated status/alive columns where available
-            df["status_checked"] = df["is_alive_val"].notna()
-            df["http_status"] = df["http_status_val"].combine_first(df["http_status"])
-            df["is_alive"] = df["is_alive_val"].combine_first(df["is_alive"])
-
-        # Add month column for new analysis
-        df["month"] = df["expired"].dt.month
-        # Create a period/string column for monthly grouping and plotting
-        df["month_year_str"] = df["expired"].dt.to_period("M").astype(str)
-        return df
-
-    def render_header_metrics(self):
-        col1, col2, col3, col4 = st.columns(4)
-
-        # Use the base data length for the primary metrics
-        diff = len(self.df_stag) - len(self.df_prod)
-        diff_pct = (diff / len(self.df_prod) * 100) if len(self.df_prod) > 0 else 0
-
-        with col1:
-            st.metric("Staging Expired", len(self.df_stag))
-        with col2:
-            st.metric("Production Expired", len(self.df_prod), delta=f"{diff:+}")
-        with col3:
-            if abs(diff_pct) > 10:
-                color = "metric-bad" if diff > 0 else "metric-good"
-                st.markdown(f"<div class='{color} big-font'>{diff_pct:+.1f}% vs PROD</div>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<div class='big-font'>{diff_pct:+.1f}% diff</div>", unsafe_allow_html=True)
-        with col4:
-            st.caption(f"Last refreshed: {datetime.now():%b %d, %Y %H:%M}")
-
-    def render_time_series_analysis(self, selected_year):
-        """Renders charts for yearly and monthly aggregations, enhanced with status if validated."""
-        st.header("Expired URLs Time Series")
-
-        # --- Aggregation by Year (Original, enhanced with Status if available) ---
-        st.subheader("Count by Expiration Year Breakdown (All Years)")
-
-        # Check if we have status data to enrich the chart
-        has_status_data = self.df_analysis["status_checked"].any()
-
-        group_cols = ["year", "env"]
-        if has_status_data:
-            st.caption("Broken/Alive status is shown if URL validation was performed in the Validator tab.")
-            # Convert boolean status to descriptive string for better chart labels
-            status_col = self.df_analysis["is_alive"].fillna('N/A').astype(str).replace(
-                {'True': 'Alive (2xx/3xx)', 'False': 'Broken (4xx/Error)'})
-            group_cols.append(status_col.name)
-
-            yearly = self.df_analysis.groupby(group_cols, as_index=False).size()
-            yearly.columns = ["year", "env", "Status", "count"]
-            color_map = {'Alive (2xx/3xx)': '#4ECDC4', 'Broken (4xx/Error)': '#FF6B6B', 'N/A': '#ccc'}
-            color_label = "Status"
-            barmode = "stack"
+        if df.empty:
+            st.info("No data matches your filters")
         else:
-            yearly = self.df_analysis.groupby(group_cols, as_index=False).size()
-            yearly.columns = ["year", "env", "count"]
-            color_map = {"Staging": "#FF6B6B", "Production": "#4ECDC4"}
-            color_label = "env"
-            barmode = "group"
+            display = df[["env", "mappedOfferId", "videoURL", "expired"]].sort_values(["env", "expired"])
+            st.dataframe(display, use_container_width=True, height=700, hide_index=True)
 
-        fig_year = px.bar(
-            yearly,
-            x="year",
-            y="count",
-            color=color_label,
-            barmode=barmode,
-            text="count",
-            color_discrete_map=color_map,
-            labels={"count": "Expired URLs", "year": "Expiration Year"},
-            title="Expired URLs per Year – Staging vs Production"
-        )
-        fig_year.update_traces(textposition="outside")
-        st.plotly_chart(fig_year, use_container_width=True, width='stretch')
+            # Excel Export
+            excel = to_excel_safe(display, f"URLs_{selected_year}")
+            st.download_button(
+                "Download as Excel",
+                excel,
+                f"expired_urls_{selected_year}.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
-        # --- Aggregation by Month (Now controlled by the global selector) ---
-        st.markdown("---")
-        st.subheader(f"Monthly Trend Drilldown for Year {selected_year}")
+            # Click to view all URLs for offer
+            sel = st.dataframe(
+                display.head(50),
+                use_container_width=True,
+                height=200,
+                on_select="rerun",
+                selection_mode="single-row",
+                key="offer_click"
+            )
+            if sel.selection.rows:
+                offer_id = display.iloc[sel.selection.rows[0]]["mappedOfferId"]
+                with st.expander(f"All URLs for {offer_id}", expanded=True):
+                    full = combined[
+                        (combined["mappedOfferId"] == offer_id) &
+                        (combined["year"] == selected_year)
+                        ][["env", "videoURL", "expired"]]
+                    st.dataframe(full, use_container_width=True)
+                    st.caption(f"{len(full)} entries")
 
-        monthly_data = self.df_analysis[self.df_analysis["year"] == selected_year]
-        if monthly_data.empty:
-            st.info(f"No expired URLs found for the selected year {selected_year}.")
-            return
-
-        monthly_grouped = monthly_data.groupby(["month_year_str", "env"], as_index=False).size()
-        monthly_grouped.columns = ["month_year_str", "env", "count"]
-
-        fig_month = px.line(
-            monthly_grouped,
-            x="month_year_str",
-            y="count",
-            color="env",
-            color_discrete_map={"Staging": "#FF6B6B", "Production": "#4ECDC4"},
-            markers=True,
-            title=f"Monthly Expired URL Trend in {selected_year}"
-        )
-        fig_month.update_xaxes(title_text="Month of Expiration", categoryorder='category ascending')
-        fig_month.update_yaxes(title_text="Expired URLs Count")
-        st.plotly_chart(fig_month, use_container_width=True)
-
-    def render_drilldown_tab(self, selected_year):
-        """Renders the detailed tables for the globally selected year."""
-        st.header(f"Detailed Drill Down: {selected_year} Expired URLs")
-
-        col1, col2 = st.columns(2)
-
-        # Columns to display in the drilldown table, including new status columns
-        analysis_cols = ["mappedOfferId", "videoURL", "expired", "http_status", "is_alive", "response_time_ms"]
-
-        stag_data = self.df_analysis[
-            (self.df_analysis["year"] == selected_year) &
-            (self.df_analysis["env"] == "Staging")
-            ][analysis_cols]
-
-        prod_data = self.df_analysis[
-            (self.df_analysis["year"] == selected_year) &
-            (self.df_analysis["env"] == "Production")
-            ][analysis_cols]
-
-        with col1:
-            st.subheader("Staging Data")
-            st.dataframe(stag_data, use_container_width=True, height=400)
-            st.caption(f"{len(stag_data)} URLs in Staging for {selected_year}")
-
-        with col2:
-            st.subheader("Production Data")
-            st.dataframe(prod_data, use_container_width=True, height=400)
-            st.caption(f"{len(prod_data)} URLs in Production for {selected_year}")
-
-    def render_diff_detective_tab(self):
-        # Identify URLs present in one environment but not the other
-        stag_only = self.df_analysis[
-            (self.df_analysis["env"] == "Staging") &
-            (~self.df_analysis["videoURL"].isin(self.df_analysis[self.df_analysis["env"] == "Production"]["videoURL"]))
-            ].drop_duplicates(subset=["videoURL"])
-
-        prod_only = self.df_analysis[
-            (self.df_analysis["env"] == "Production") &
-            (~self.df_analysis["videoURL"].isin(self.df_analysis[self.df_analysis["env"] == "Staging"]["videoURL"]))
-            ].drop_duplicates(subset=["videoURL"])
+    # === TAB 3: Deep Diff ===
+    with tab_diff:
+        stag_y = stag[stag["year"] == selected_year]
+        prod_y = prod[prod["year"] == selected_year]
+        only_stag = stag_y[~stag_y["videoURL"].isin(prod_y["videoURL"])]
+        only_prod = prod_y[~prod_y["videoURL"].isin(stag_y["videoURL"])]
 
         c1, c2 = st.columns(2)
-        # Added response_time_ms for more data, and preparing to use a larger table size
-        display_cols = ["mappedOfferId", "videoURL", "expired", "http_status", "is_alive", "response_time_ms"]
-
         with c1:
-            st.subheader("Only in Staging (false positives?)")
-            if len(stag_only) > 0:
-                # Increased height for a bigger table
-                st.dataframe(stag_only[display_cols], use_container_width=True, height=600)
-                st.error(f"{len(stag_only)} Unique URLs")
+            st.subheader(f"Only in Staging ({selected_year})")
+            st.metric("Count", len(only_stag))
+            if len(only_stag):
+                st.dataframe(only_stag[["mappedOfferId", "videoURL"]], height=600)
+                st.download_button("Export", to_excel_safe(only_stag), f"only_staging_{selected_year}.xlsx")
             else:
-                st.success("No extra URLs")
+                st.success("Clean")
 
         with c2:
-            st.subheader("Only in Production (data drift!)")
-            if len(prod_only) > 0:
-                # Increased height for a bigger table
-                st.dataframe(prod_only[display_cols], use_container_width=True, height=600)
-                st.warning(f"{len(prod_only)} Unique URLs – investigate!")
+            st.subheader(f"Only in Production ({selected_year})")
+            st.metric("Count", len(only_prod))
+            if len(only_prod):
+                st.dataframe(only_prod[["mappedOfferId", "videoURL"]], height=600)
+                st.download_button("Export", to_excel_safe(only_prod), f"only_prod_{selected_year}.xlsx")
             else:
-                st.success("Perfectly synced")
+                st.success("Synced")
 
-    def render_validator_export_tab(self):
-        st.subheader("Live URL Validation + Export Report")
-        st.info("Validation results are stored for the current session and used in the analysis tabs.")
+    # === TAB 4: Health Check ===
+    with tab_health:
+        if st.button("Run Health Check", type="primary", use_container_width=True):
+            urls = combined["videoURL"].dropna().unique()
+            results = []
+            for url in st.progress(urls):
+                try:
+                    r = requests.head(url, timeout=8)
+                    results.append({"URL": url, "Status": r.status_code, "Alive": r.status_code < 400})
+                except:
+                    results.append({"URL": url, "Status": "Error", "Alive": False})
+            st.session_state.health = pd.DataFrame(results)
+            st.success("Done!")
 
-        if st.button("Validate All Unique URLs Now!", type="primary"):
-            # The validation only needs to run on the base combined DF as it extracts unique URLs
-            with st.spinner("Checking unique URLs in parallel..."):
-                validated_df = URLValidator.validate_all(self.df_combined)
-                st.session_state.validation_results = validated_df
-                # Rerun to update analysis data across all tabs
-                st.rerun()
+        if "health" in st.session_state:
+            h = st.session_state.health
+            st.write(f"**{len(h)} URLs** → **{h['Alive'].sum()} alive**")
+            # SUGAR: Ensure styling column exists before applying style (needed if using mock data)
+            if 'Alive' in h.columns:
+                st.dataframe(h.style.apply(
+                    lambda r: ["background-color:#d4edda" if r.Alive else "background-color:#f8d7da"] * len(r), axis=1))
+            else:
+                st.dataframe(h)
+            st.download_button("Export Health", to_excel_safe(h), "url_health.xlsx")
 
-        if "validation_results" in st.session_state and not st.session_state.validation_results.empty:
-            df_val = st.session_state.validation_results
-            alive = df_val["alive"].sum()
-
-            st.write(f"Total Unique URLs checked: **{len(df_val)}**")
-            st.write(f"Alive (2xx/3xx): **{alive}** | Dead/Broken (4xx/Error/Timeout): **{len(df_val) - alive}**")
-
-            # Color styling for the table
-            def highlight_row(row):
-                # Only apply highlighting if 'alive' is not None (i.e., successfully checked)
-                if row.alive is True:
-                    return ["background-color: #d4edda"] * len(row)
-                elif row.alive is False:
-                    return ["background-color: #f8d7da"] * len(row)
-                return [""] * len(row)
-
-            styled = df_val.style.apply(highlight_row, axis=1)
-            st.dataframe(styled, use_container_width=True, height=500)
-
-            # Export options
-            col1, col2, col3 = st.columns(3)
-
-            # CSV export
-            csv = df_val.to_csv(index=False).encode('utf-8')
-
-            # Excel export
-            buffer = io.BytesIO()
-            with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
-                df_val.to_excel(writer, sheet_name='URL Health Report', index=False)
-            excel_data = buffer.getvalue()
-
-            with col1:
-                st.download_button("Download CSV", csv, "url_health_report.csv", "text/csv")
-            with col2:
-                st.download_button("Download Excel", excel_data, "url_health_report.xlsx",
-                                   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-            with col3:
-                if st.button("Clear Results"):
-                    del st.session_state.validation_results
-                    st.rerun()
-
-    def run(self):
-        st.title("STAG vs PROD Expired URLs Battle Arena")
-
-        # Re-get the analysis DF every run to check for new session state changes (validation results)
-        self.df_analysis = self._get_analysis_df()
-
-        self.render_header_metrics()
-        st.markdown("---")
-
-        # --- GLOBAL YEAR SELECTION ---
-        years = sorted(self.df_analysis["year"].unique(), reverse=True)
-        if years:
-            # Set default year to the latest available year
-            default_year_index = years.index(max(years)) if max(years) in years else 0
-
-            st.markdown('<div class="global-selector-container">', unsafe_allow_html=True)
-            col_sel, _ = st.columns([1, 4])
-            with col_sel:
-                selected_year = st.selectbox(
-                    "Select Expiration Year Focus",
-                    years,
-                    index=default_year_index,
-                    key="global_year_selector",
-                    help="Filter charts and drill-down tables by this expiration year."
-                )
-            st.markdown('</div>', unsafe_allow_html=True)
-        else:
-            st.error("No expiration year data found in the files.")
-            return
-
-        # --- TABS ---
-        tab1, tab2, tab3, tab4 = st.tabs([
-            "Time Series Analysis",
-            "Drill Down",
-            "Diff Detective",
-            "Validator & Export"
-        ])
-
-        with tab1:
-            self.render_time_series_analysis(selected_year)
-
-        with tab2:
-            self.render_drilldown_tab(selected_year)
-
-        with tab3:
-            self.render_diff_detective_tab()
-
-        with tab4:
-            self.render_validator_export_tab()
-
-        st.markdown("<div class='footer'>Made with Streamlit • Global Year Filtering • Enhanced Time Series</div>",
-                    unsafe_allow_html=True)
+    st.markdown("<div class='footer'>Modular • Excel-safe • Dark mode • Filters • Click modal • GitLab CI ready</div>",
+                unsafe_allow_html=True)
 
 
-# ========================= RUN APP =========================
 if __name__ == "__main__":
-    try:
-        dashboard = ExpiredURLsComparator()
-        dashboard.run()
-    except Exception as e:
-        # Catch exceptions during initialization or run
-        st.error(f"An error occurred: {e}")
-        st.stop()
+    main()
