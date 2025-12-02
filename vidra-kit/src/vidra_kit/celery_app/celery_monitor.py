@@ -1,6 +1,7 @@
 from dataclasses import dataclass, asdict, field
 from typing import Dict, List, Optional, Any
 
+import redis
 from celery import current_app
 
 from vidra_kit.backends.api import RabbitMQMonitor
@@ -86,8 +87,8 @@ class CeleryMonitor:
     def __init__(self, app=None):
         self.app = app or current_app
         self.inspect = self.app.control.inspect()
-        # self._redis_client = None
-        self.broker = RabbitMQMonitor(self.app.conf.broker_url)
+        self.redis_client = redis.Redis(decode_responses=False, db=1)
+        # self.broker = RabbitMQMonitor(self.app.conf.broker_url)
 
     def get_workers_status(self) -> List[WorkerStatus]:
         """
@@ -134,7 +135,7 @@ class CeleryMonitor:
                 if self.app.conf.task_queues
                 else ["celery"]
             )
-        return queues
+        # return queues
         infos = []
         for queue in queues:
             length = self.redis_client.llen(queue)
@@ -247,7 +248,7 @@ class CeleryMonitora:
 
 # Example usage function (enhanced with dataclasses)
 def monitor_celery_summary():
-    monitor = CeleryMonitor(app=app_prod)
+    monitor = CeleryMonitor(app=app)
     workers = monitor.get_workers_status()
     queues = monitor.get_queue_infos()
 
@@ -260,7 +261,7 @@ def monitor_celery_summary():
 
     print("\n=== Queues ===")
     for q in queues:
-        print(f"{q.name}: {q.length} tasks")
+        print(f"{q}: tasks")
 
     # Example: Serialize to JSON-like dict
     summary = {
@@ -268,3 +269,5 @@ def monitor_celery_summary():
         "queues": [q.to_dict() for q in queues],
     }
     print("\n=== JSON Summary ===", summary)
+
+monitor_celery_summary()

@@ -52,7 +52,7 @@ def fetch_external_data(self, url):
         logger.error("A critical, non-retryable error occurred.")
         return {"status": "failed", "error": str(e)}
 
-
+0
 # --- Chaining Task Example (Using a chord to aggregate results) ---
 
 @app.task
