@@ -1,0 +1,48 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyCompatibilityInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ourVersions">
+        <value>
+          <list size="1">
+            <item index="0" class="java.lang.String" itemvalue="3.14" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="anyjson" />
+          <option value="Babel" />
+          <option value="backports.ssl-match-hostname" />
+          <option value="ecdsa" />
+          <option value="enum34" />
+          <option value="patchwork" />
+          <option value="flower" />
+          <option value="futures" />
+          <option value="ipaddress" />
+          <option value="ndg-httpsclient" />
+          <option value="psycopg2" />
+          <option value="pyasn1" />
+          <option value="pycrypto" />
+          <option value="pyOpenSSL" />
+          <option value="pytz" />
+          <option value="redlock-py" />
+          <option value="tornado" />
+          <option value="playready" />
+          <option value="tswebvtt" />
+          <option value="ts_vodpackage_validator" />
+          <option value="backports.functools-lru-cache" />
+          <option value="configparser" />
+          <option value="contextlib2" />
+          <option value="future" />
+          <option value="importlib-metadata" />
+          <option value="scandir" />
+          <option value="zipp" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

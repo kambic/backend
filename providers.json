@@ -1,0 +1,486 @@
+[
+{
+    "model": "vod.provider",
+    "pk": 24,
+    "fields": {
+        "name": "alteka",
+        "slug": "alteka",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_alteka",
+        "queue": "alteka"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 25,
+    "fields": {
+        "name": "babytv",
+        "slug": "babytv",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_babytv",
+        "queue": "babytv"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 26,
+    "fields": {
+        "name": "blitz",
+        "slug": "blitz",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_blitz",
+        "queue": "blitz"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 27,
+    "fields": {
+        "name": "cinestarpremiere",
+        "slug": "cinestarpremiere",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_cinestarpremiere",
+        "queue": "cinestarpremiere"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 28,
+    "fields": {
+        "name": "curiositystream",
+        "slug": "curiositystream",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_curiositystream",
+        "queue": "curiositystream"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 29,
+    "fields": {
+        "name": "dvk",
+        "slug": "dvk",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_dvk",
+        "queue": "dvk"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 30,
+    "fields": {
+        "name": "epicdrama",
+        "slug": "epicdrama",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_epicdrama",
+        "queue": "epicdrama"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 31,
+    "fields": {
+        "name": "hbo",
+        "slug": "hbo",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_adi_hbo",
+        "queue": "hbo"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 33,
+    "fields": {
+        "name": "hustler",
+        "slug": "hustler",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_adi_hustler",
+        "queue": "hustler"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 34,
+    "fields": {
+        "name": "kitchentv",
+        "slug": "kitchentv",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_kitchentv",
+        "queue": "kitchentv"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 35,
+    "fields": {
+        "name": "minimax",
+        "slug": "minimax",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_adi_minimax",
+        "queue": "minimax"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 36,
+    "fields": {
+        "name": "moonbug",
+        "slug": "moonbug",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_moonbug",
+        "queue": "moonbug"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 37,
+    "fields": {
+        "name": "natgeo",
+        "slug": "natgeo",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_natgeo",
+        "queue": "natgeo"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 38,
+    "fields": {
+        "name": "noof",
+        "slug": "noof",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_adi_noof",
+        "queue": "noof"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 39,
+    "fields": {
+        "name": "pickbox",
+        "slug": "pickbox",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_adi_pickbox",
+        "queue": "pickbox"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 40,
+    "fields": {
+        "name": "playboy",
+        "slug": "playboy",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_adi_playboy",
+        "queue": "playboy"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 41,
+    "fields": {
+        "name": "sandbox",
+        "slug": "sandbox",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_sandbox",
+        "queue": "sandbox"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 42,
+    "fields": {
+        "name": "viasat",
+        "slug": "viasat",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_package_viasat",
+        "queue": "viasat"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 43,
+    "fields": {
+        "name": "vivid",
+        "slug": "vivid",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_adi_vivid",
+        "queue": "vivid"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 44,
+    "fields": {
+        "name": "vubiquity",
+        "slug": "vubiquity",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_adi_vubiquity",
+        "queue": "vubiquity"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 45,
+    "fields": {
+        "name": "hbo_master",
+        "slug": "hbo_master",
+        "active": true,
+        "vidra_task": "vydra.tasks.ingest_adi_hbo_master",
+        "queue": "hbo_master"
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3170,
+    "fields": {
+        "name": "universal",
+        "slug": "universal",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3171,
+    "fields": {
+        "name": "mg_film",
+        "slug": "mg_film",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3172,
+    "fields": {
+        "name": "fivia",
+        "slug": "fivia",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3173,
+    "fields": {
+        "name": "curiosity",
+        "slug": "curiosity",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3174,
+    "fields": {
+        "name": "liffe",
+        "slug": "liffe",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3175,
+    "fields": {
+        "name": "lgl",
+        "slug": "lgl",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3176,
+    "fields": {
+        "name": "ag_market",
+        "slug": "ag_market",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3177,
+    "fields": {
+        "name": "paramount",
+        "slug": "paramount",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3178,
+    "fields": {
+        "name": "disney",
+        "slug": "disney",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3179,
+    "fields": {
+        "name": "dorcel",
+        "slug": "dorcel",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3180,
+    "fields": {
+        "name": "karantanija",
+        "slug": "karantanija",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3181,
+    "fields": {
+        "name": "mgm",
+        "slug": "mgm",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3182,
+    "fields": {
+        "name": "praznik",
+        "slug": "praznik",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3183,
+    "fields": {
+        "name": "amc",
+        "slug": "amc",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3184,
+    "fields": {
+        "name": "fox",
+        "slug": "fox",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3185,
+    "fields": {
+        "name": "cinemania",
+        "slug": "cinemania",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3186,
+    "fields": {
+        "name": "continental",
+        "slug": "continental",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3187,
+    "fields": {
+        "name": "wbd",
+        "slug": "wbd",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3188,
+    "fields": {
+        "name": "sony",
+        "slug": "sony",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3189,
+    "fields": {
+        "name": "kultura",
+        "slug": "kultura",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3190,
+    "fields": {
+        "name": "skl",
+        "slug": "skl",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3191,
+    "fields": {
+        "name": "vod_prov",
+        "slug": "vod_prov",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+},
+{
+    "model": "vod.provider",
+    "pk": 3192,
+    "fields": {
+        "name": "neodvisen_tv",
+        "slug": "neodvisen_tv",
+        "active": false,
+        "vidra_task": null,
+        "queue": null
+    }
+}
+]

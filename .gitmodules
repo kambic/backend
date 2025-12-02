@@ -1,0 +1,3 @@
+[submodule "vidra-kit"]
+	path = vidra-kit
+	url = git@gitlab.telekom.si:vidra/vidra-kit.git
