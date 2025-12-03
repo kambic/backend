@@ -1,11 +1,11 @@
-import os
+import subprocess
 import tarfile
 import tempfile
-import subprocess
 from pathlib import Path
-from lxml import etree
-from celery import shared_task, group
+
+from celery import shared_task
 from django.conf import settings
+from lxml import etree
 
 from vidra_kit.backends.api import RabbitMQMonitor
 from .models import Video

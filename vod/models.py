@@ -5,7 +5,6 @@ from django.db import models
 from django.db.models.functions import Coalesce
 from django.utils.text import Truncator, slugify
 
-
 from vidra_kit.adi import ADIParser
 from vidra_kit.adi.parser import ADIParseError
 from vidra_kit.adi.validator import ADIValidatorConfig, ADIValidator
@@ -57,7 +56,7 @@ class Provider(models.Model):
 
 class Package(TimeStampedModel):
     name = models.CharField(max_length=255)
-    original = models.FileField(null=True, blank=True,  upload_to='packages/')
+    original = models.FileField(null=True, blank=True, upload_to='packages/')
 
     manifest = models.FileField(
         upload_to='manifests/',
@@ -172,6 +171,24 @@ class Edge(models.Model):
         return Truncator(self.title).chars(15, truncate="...")
 
 
+class Offer(models.Model):
+    ENV = models.TextChoices("ENV", "stag prod")
+
+    edge = models.ForeignKey(Edge, on_delete=models.CASCADE, null=True)
+    offer_id = models.CharField(max_length=255, null=True)
+    expiration_date = models.DateTimeField(null=True)
+    env = models.CharField(max_length=255, null=True, choices=ENV, default=ENV.stag)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["offer_id", "env"], name="unq_offer_env"),
+        ]
+        indexes = [
+            models.Index(fields=["offer_id"]),
+            models.Index(fields=["env"]),
+        ]
+
+
 class Stream(models.Model):
     PROTOCOL = [
         ("hls", "hls"),
@@ -179,20 +196,17 @@ class Stream(models.Model):
         ("mss", "mss"),
     ]
     edge = models.ForeignKey(Edge, on_delete=models.CASCADE, null=True, related_name="streams")
+    offer = models.ForeignKey(Offer, on_delete=models.CASCADE, null=True, related_name="offers")
     stream_protocol = models.CharField(max_length=4, choices=PROTOCOL)
     uri = models.URLField(max_length=512)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["edge", "stream_protocol"], name="unq_edge_proto")]
+        constraints = [models.UniqueConstraint(fields=["edge", "stream_protocol"], name="unq_edge_proto"),
+                       models.UniqueConstraint(fields=["offer", "uri"], name="unq_offer_uri"),
+                       ]
+        indexes = [
+            models.Index(fields=["uri"]),
+        ]
 
     def __str__(self):
-        return f"[{self.stream_protocol}] {self.edge.title}"
-
-
-class TaskStateChoices(models.TextChoices):
-    """Choices for task execution state."""
-
-    PENDING = 'pending', 'Pending'
-    STARTED = 'started', 'Started'
-    SUCCESS = 'success', 'Success'
-    FAILURE = 'failure', 'Failure'
+        return Truncator(self.uri).chars(15, truncate="...")

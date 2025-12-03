@@ -1,32 +1,27 @@
-from django.db import models
-
 # Create your models here.
 from django.db import models
 from django.utils import timezone
-from enum import Enum
 
 
-# Task state choices
-class TaskState(str, Enum):
-    PENDING = "PENDING"
+class TaskState(models.TextChoices):
+    """Choices for task execution state."""
+
+    PENDING = 'pending', 'Pending'
     RECEIVED = "RECEIVED"
-    STARTED = "STARTED"
-    SUCCESS = "SUCCESS"
-    FAILURE = "FAILURE"
-    REVOKED = "REVOKED"
-    REJECTED = "REJECTED"
-    RETRY = "RETRY"
-    IGNORED = "IGNORED"
 
-    @classmethod
-    def choices(cls):
-        return [(state.value, state.name) for state in cls]
+    STARTED = 'started', 'Started'
+    SUCCESS = 'success', 'Success'
+    FAILURE = 'failure', 'Failure'
+    REVOKED = "REVOKED", "REVOKED"
+    REJECTED = "REJECTED", "REJECTED"
+    RETRY = "RETRY" ,"RETRY"
+    IGNORED = "IGNORED", "IGNORED"
 
 
 class Task(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
     type = models.CharField(max_length=255, null=True, blank=True)
-    state = models.CharField(max_length=20, choices=TaskState.choices())
+    state = models.CharField(max_length=20, choices=TaskState)
 
     # Timestamps
     sent_at = models.DateTimeField(null=True, blank=True)
@@ -66,7 +61,7 @@ class Task(models.Model):
 class TaskResult(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
     type = models.CharField(max_length=255, null=True, blank=True)
-    state = models.CharField(max_length=20, choices=TaskState.choices())
+    state = models.CharField(max_length=20, choices=TaskState)
     queue = models.CharField(max_length=255, null=True, blank=True)
 
     result = models.TextField(null=True, blank=True)

@@ -5,7 +5,15 @@ from django.utils.html import format_html
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Video, Package, Provider, Edge, Stream
+from .models import Video, Package, Provider, Edge, Stream, Offer
+
+
+@admin.register(Offer)
+class OfferAdmin(admin.ModelAdmin):
+    list_display = ('id', 'env', 'offer_id', 'expiration_date')
+    readonly_fields = ('edge', 'expiration_date')
+    date_hierarchy = 'expiration_date'
+    list_filter = ('env',)
 
 
 @admin.register(Provider)
