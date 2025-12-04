@@ -1,4 +1,4 @@
-from vidra_kit.celery_app.app import app, app_prod
+# from vidra_kit.celery_app.app import app, app_prod
 # celery_result.py
 import os
 from celery import Celery
@@ -21,35 +21,37 @@ class CeleryResultHandler:
             self.celery_app = self._make_celery_app()
 
     @classmethod
-    def get_instance(cls, celery_app: Optional[Celery] = None) -> 'CeleryResultHandler':
+    def get_instance(cls, celery_app: Optional[Celery] = None) -> "CeleryResultHandler":
         """Singleton-like access (useful in web requests)"""
-        env = os.getenv('CELERY_ENV', 'production')
+        env = os.getenv("CELERY_ENV", "production")
         key = env
         if key not in cls._instances:
             cls._instances[key] = cls(celery_app)
         return cls._instances[key]
 
     def _make_celery_app(self) -> Celery:
-        env = os.getenv('CELERY_ENV', 'production').lower()
+        env = os.getenv("CELERY_ENV", "production").lower()
 
         config_module = {
-            'production': 'config.production.Config',
-            'staging': 'config.staging.Config',
-            'development': 'config.development.Config',
-            'testing': 'config.testing.Config',
-            'local': 'config.local.Config',
-        }.get(env, 'config.staging.Config')  # fallback to staging
+            "production": "config.production.Config",
+            "staging": "config.staging.Config",
+            "development": "config.development.Config",
+            "testing": "config.testing.Config",
+            "local": "config.local.Config",
+        }.get(
+            env, "config.staging.Config"
+        )  # fallback to staging
 
         # Dynamic import
-        module_path, class_name = config_module.rsplit('.', 1)
+        module_path, class_name = config_module.rsplit(".", 1)
         module = __import__(module_path, fromlist=[class_name])
         config_class = getattr(module, class_name)
 
-        app = Celery('vidra_kit')
+        app = Celery("vidra_kit")
         app.config_from_object(config_class())
 
         # Optional: autodiscover tasks
-        app.autodiscover_tasks(['celery_app', 'your_other_tasks_package'])
+        app.autodiscover_tasks(["celery_app", "your_other_tasks_package"])
 
         return app
 
@@ -57,10 +59,9 @@ class CeleryResultHandler:
     # Core methods
     # ------------------------------------------------------------------ #
 
-    def get_result(self,
-                   task_id: str,
-                   timeout: Optional[float] = 10.0,
-                   propagate: bool = True) -> Any:
+    def get_result(
+        self, task_id: str, timeout: Optional[float] = 10.0, propagate: bool = True
+    ) -> Any:
         """
         Get task result (blocks until ready or timeout).
         """
@@ -112,9 +113,10 @@ class CeleryResultHandler:
 task_id = "44ab7094-4600-496f-ac33-24450ae44aac"
 res = AsyncResult(task_id, app=app)  # Important: pass the app if not in the same module
 from pprint import pprint
+
 # Check status
-print(res.state)   # 'PENDING', 'STARTED', 'SUCCESS', 'FAILURE', etc.
-print(res.ready()) # True if finished (success or failure)
+print(res.state)  # 'PENDING', 'STARTED', 'SUCCESS', 'FAILURE', etc.
+print(res.ready())  # True if finished (success or failure)
 print(res.successful())  # True only if SUCCESS
 print(res.failed())
 
@@ -133,7 +135,7 @@ handler = CeleryResultHandler(celery_app=app)
 
 # Non-blocking (recommended for web)
 status = handler.get_result_nonblocking(task_id)
-print('status')
+print("status")
 pprint(status)
 
 # Blocking (use carefully)

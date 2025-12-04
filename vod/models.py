@@ -171,6 +171,10 @@ class Edge(models.Model):
         return Truncator(self.title).chars(15, truncate="...")
 
 
+class OfferManager(models.Manager):
+    def with_expired_count(self):
+        return self.annotate(num_expired=Coalesce(models.Count("edge"), 0))
+
 class Offer(models.Model):
     ENV = models.TextChoices("ENV", "stag prod")
 

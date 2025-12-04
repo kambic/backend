@@ -147,9 +147,6 @@ class RabbitMQMonitor:
         )
 
 
-# ----------------------------------------------------------------------
-# Main CeleryManager (No Django, pure Python)
-# ----------------------------------------------------------------------
 class CeleryManager:
     """
     Unified Celery monitor + manager for non-Django environments.

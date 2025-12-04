@@ -8,6 +8,7 @@ dependencies = [
     "celery-types==0.23.0",
     "dash>=3.3.0",
     "django>=5.2.8",
+    "django-celery-results>=2.6.0",
     "django-extensions>=4.1",
     "django-filter>=25.2",
     "django-import-export>=4.3.14",
@@ -35,10 +36,13 @@ vidra-kit = { workspace = true }
 
 [dependency-groups]
 dev = [
+    "black>=25.11.0",
     "dash>=3.3.0",
+    "django-debug-toolbar>=6.1.0",
     "faker>=38.2.0",
     "git-archive-all>=1.23.1",
     "matplotlib>=3.10.7",
     "pandas>=2.3.3",
     "plotly>=6.5.0",
+    "suds>=1.2.0",
 ]

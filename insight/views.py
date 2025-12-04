@@ -8,7 +8,7 @@ from rest_framework.viewsets import ViewSet
 
 from vidra_kit.celery_app.celery_manager import CeleryManager
 from .models import Task
-from .serializers import TaskSerializer, TaskResultSerializer
+from .serializers import TaskSerializer
 
 # Import the Celery application instance
 # This assumes 'celery_config.py' is accessible or properly configured in your environment.
@@ -17,12 +17,16 @@ try:
     from backend.celery import app
 except ImportError:
     # Handle case where celery_config is not found during import
-    raise ImproperlyConfigured("Could not import 'app' from celery_config. Make sure the file is in the project root.")
+    raise ImproperlyConfigured(
+        "Could not import 'app' from celery_config. Make sure the file is in the project root."
+    )
+
 
 class TaskViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Provides list and retrieve endpoints for Tasks.
     """
+
     queryset = Task.objects.all().order_by("-sent_at")
     serializer_class = TaskSerializer
 
@@ -32,7 +36,9 @@ class TaskViewSet(viewsets.ReadOnlyModelViewSet):
         try:
             task = Task.objects.get(pk=pk)
         except Task.DoesNotExist:
-            return Response({"detail": "Task not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Task not found."}, status=status.HTTP_404_NOT_FOUND
+            )
 
         # Fetch result from Celery
         celery_app = get_celery_app()  # replace with async if you use async Celery app
@@ -52,8 +58,8 @@ class TaskViewSet(viewsets.ReadOnlyModelViewSet):
             "worker": getattr(result, "worker", None),
         }
 
-        serializer = TaskResultSerializer(task_result_data)
         return Response(serializer.data)
+
 
 class TaskViewSet2(ViewSet):
 
@@ -92,36 +98,8 @@ class TaskViewSet2(ViewSet):
         )
 
 
-def get_celery_stats_sync():
-    """
-    Synchronous function to interact with Celery's inspection API.
-    This function blocks and should be called from an executor or separate thread.
-    """
-    i = app.control.inspect()
-
-    # 1. Active workers
-    active_workers = i.ping()
-
-    # 2. Currently running tasks
-    active_tasks = i.active()
-
-    # 3. Scheduled (delayed) tasks
-    scheduled_tasks = i.scheduled()
-
-    # 4. Registered tasks (list of all available task functions)
-    registered_tasks = i.registered()
-
-    stats = {
-        "workers_online": len(active_workers) if active_workers else 0,
-        "workers": active_workers,
-        "active_tasks_count": sum(len(tasks) for tasks in active_tasks.values()) if active_tasks else 0,
-        "active_tasks": active_tasks,
-        "scheduled_tasks": scheduled_tasks,
-        "registered_tasks": registered_tasks,
-    }
-    return stats
-
 # CeleryManager
+
 
 class CeleryViewSet(ViewSet):
     """
@@ -131,11 +109,13 @@ class CeleryViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="stats")
     def stats(self, request):
         try:
-            stats = get_celery_stats_sync()
-            print(
-                f"Celery stats: {stats}"
-            )
-            return Response(stats, status=status.HTTP_200_OK)
+            manager = CeleryManager(app)
+            q = manager.get_queues()
+            print(f"Celery queues: {q}")
+
+            # stats = get_celery_stats_sync()
+
+            return Response(q.to_dict(), status=status.HTTP_200_OK)
 
         except Exception as e:
             # Log in real app
@@ -144,6 +124,7 @@ class CeleryViewSet(ViewSet):
                 {"error": "Failed to connect to or inspect Celery workers."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
 
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action

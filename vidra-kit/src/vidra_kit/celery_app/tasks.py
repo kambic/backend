@@ -1,12 +1,13 @@
-from vidra_kit.celery_app import app  # Import the Celery app instance from your factory
+# from vidra_kit.celery_app import get_celery_app
 from loguru import logger
 import time
 import random
-
+from celery import shared_task
 
 # --- Simple Task Example ---
 
-@app.task
+
+@shared_task
 def add(x, y):
     """Adds two numbers and logs the result."""
 
@@ -22,13 +23,21 @@ def add(x, y):
 
 # --- Binding Task Example (for retries/state) ---
 
-@app.task(bind=True, max_retries=3, default_retry_delay=5)  # Retry up to 3 times, waiting 5s
+
+@shared_task(
+    bind=True, max_retries=3, default_retry_delay=5
+)  # Retry up to 3 times, waiting 5s
 def fetch_external_data(self, url):
     """Simulates fetching data from an unreliable external API with retries."""
 
     # The 'self' argument is available because bind=True
     attempt = self.request.retries + 1
-    logger.info("Attempting to fetch URL: {} (Attempt {}/{})...", url, attempt, self.max_retries + 1)
+    logger.info(
+        "Attempting to fetch URL: {} (Attempt {}/{})...",
+        url,
+        attempt,
+        self.max_retries + 1,
+    )
 
     try:
         # Simulate network failure 75% of the time on first two attempts
@@ -52,10 +61,11 @@ def fetch_external_data(self, url):
         logger.error("A critical, non-retryable error occurred.")
         return {"status": "failed", "error": str(e)}
 
-0
+
 # --- Chaining Task Example (Using a chord to aggregate results) ---
 
-@app.task
+
+@shared_task
 def process_data_chunk(chunk_id, data_list):
     """Processes a small chunk of data and returns a result."""
     # Simulate processing time
@@ -65,7 +75,7 @@ def process_data_chunk(chunk_id, data_list):
     return result
 
 
-@app.task
+@shared_task
 def aggregate_results(results):
     """Aggregates the results from all processed chunks."""
     final_sum = sum(results)
@@ -76,26 +86,23 @@ def aggregate_results(results):
 # Example of how to call the chain (usually done from an external application)
 def start_processing_workflow():
     data = [10, 20, 30, 40, 50, 60]
-    chunks = [data[i:i + 2] for i in range(0, len(data), 2)]
+    chunks = [data[i : i + 2] for i in range(0, len(data), 2)]
 
     # 1. Create a group of parallel tasks (the header)
-    header = [
-        process_data_chunk.s(i, chunk)
-        for i, chunk in enumerate(chunks)
-    ]
+    header = [process_data_chunk.s(i, chunk) for i, chunk in enumerate(chunks)]
 
     # 2. Define the callback task (the body)
     callback = aggregate_results.s()
 
     # 3. Combine them into a chord
-    workflow = app.signature('celery.chord', args=[header, callback])
+    workflow = app.signature("celery.chord", args=[header, callback])
 
     logger.info("Starting chunk processing workflow (Chord).")
     # Execute the workflow and return the AsyncResult object
     return workflow.apply_async()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # This block allows you to run tasks directly for testing outside the worker
 
     # Example 1: Simple task

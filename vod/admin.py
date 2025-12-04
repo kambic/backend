@@ -8,14 +8,6 @@ from import_export.admin import ImportExportModelAdmin
 from .models import Video, Package, Provider, Edge, Stream, Offer
 
 
-@admin.register(Offer)
-class OfferAdmin(admin.ModelAdmin):
-    list_display = ('id', 'env', 'offer_id', 'expiration_date')
-    readonly_fields = ('edge', 'expiration_date')
-    date_hierarchy = 'expiration_date'
-    list_filter = ('env',)
-
-
 @admin.register(Provider)
 class ProviderAdmin(ImportExportModelAdmin):
 
@@ -54,14 +46,14 @@ class ProviderAdmin(ImportExportModelAdmin):
         return obj.num_expired
 
 
-@admin.register(Video)
+# @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'status', 'user', 'created_at')
     readonly_fields = ('processing_log', 'metadata')
     list_filter = ('status', 'created_at')
 
 
-@admin.register(Package)
+# @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('vendor/highlightjs/default.min.css',)}
@@ -137,11 +129,18 @@ class PackageAdmin(admin.ModelAdmin):
 
 class StreamAdminInline(admin.TabularInline):
     model = Stream
+    readonly_fields = 'uri', 'edge', 'stream_protocol'
+
+    def has_add_permission(self, request, obj):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Edge)
 class EdgeAdmin(admin.ModelAdmin):
-    inlines = [StreamAdminInline]
+    # inlines = [StreamAdminInline]
     list_display = (
         'id',
         'content_id',
@@ -160,3 +159,24 @@ class EdgeAdmin(admin.ModelAdmin):
         'provider',
     )
     search_fields = ('content_id', 'title')
+    readonly_fields = (
+        'id',
+        'content_id',
+        'title',
+        'creation_time',
+        'modification_time',
+        'status',
+        'playable',
+        'content_duration',
+        'provider',
+    )
+
+
+
+@admin.register(Offer)
+class OfferAdmin(admin.ModelAdmin):
+    list_display = ('id', 'env', 'offer_id', 'expiration_date')
+    readonly_fields = ('edge', 'expiration_date')
+    date_hierarchy = 'expiration_date'
+    list_filter = ('env',)
+    inlines = [StreamAdminInline]

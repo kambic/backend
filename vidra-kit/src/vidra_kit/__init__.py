@@ -1,26 +1,33 @@
 import logging
-from rich.logging import RichHandler
-
-# Configure rich logging
-logging.basicConfig(
-    level="INFO",
-    format="%(message)s",
-    datefmt="[%Y-%m-%d %H:%M:%S]",
-    handlers=[RichHandler(rich_tracebacks=True)],
-)
-
-logger = logging.getLogger("vidra_kit")
-
-logger.debug("Init by: %s %s" % (__name__, __file__))
-
-
-def ff_out():
-    return
-
-
 from dataclasses import dataclass, field
 from pathlib import Path
 import uuid
+
+get_logger = False
+
+if get_logger:
+
+    from rich.logging import RichHandler
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="(%(name)s:%(lineno)d)  %(message)s ",
+        handlers=[
+            RichHandler(
+                log_time_format="[%Y-%m-%d %H:%M:%S]",
+                rich_tracebacks=True,
+                show_time=True,
+                show_level=True,
+                show_path=False,
+            )
+        ],
+    )
+
+logger = logging.getLogger("vidra_kit")
+logger.propagate = True  # keep default behavior
+
+logging.getLogger("kombu").setLevel(logging.WARNING)
+logging.getLogger("celery").setLevel(logging.INFO)
 
 
 @dataclass

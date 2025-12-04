@@ -1,4 +1,6 @@
-from vidra_kit.celery_app.__init__ import app  # Import the Celery app
+from vidra_kit.celery_app import get_celery_app
+
+app = get_celery_app()
 from loguru import logger
 
 

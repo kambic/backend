@@ -1,33 +1,25 @@
-# your_project/celery_app/__init__.py
-
 from celery import Celery
 import os
-import sys
-from loguru import logger
 from celery.signals import task_prerun, task_postrun
 
-CELERY_CONFIG_ENV = os.environ.get('CELERY_CONFIG_ENV', 'development')
+CELERY_CONFIG_ENV = os.environ.get("CELERY_CONFIG_ENV", "development")
+from vidra_kit import logger
 
 
 @task_prerun.connect
 def on_task_prerun(task_id=None, task=None, **kwargs):
     """Fired before a task executes. Binds task info to Loguru context."""
     # Use logger.patch to add task info to the context
-    logger.patch(lambda record: record["extra"].update(task_id=task_id, task_name=task.name)).info(
-        "Celery task started.")
+    logger.info("Celery task started.")
 
 
 @task_postrun.connect
 def on_task_postrun(task_id=None, task=None, **kwargs):
     """Fired after a task executes. Logs task finish and context is implicitly cleared."""
-    logger.patch(lambda record: record["extra"].update(task_id=task_id, task_name=task.name)).info(
-        "Celery task finished.")
-    # Context is thread-local and will automatically clear for the next task run
+    logger.info("Celery task finished.")
 
 
-# --- 4. The Main Celery Factory ---
-
-def make_celery(env=None):
+def get_celery_app(env=None):
     """
     Creates and configures a Celery application based on the given environment.
     """
@@ -52,8 +44,7 @@ def make_celery(env=None):
 
     # Find tasks in the specified package
     # celery_app.autodiscover_tasks(["celery_app"], related_name='tasks')
-    celery_app.autodiscover_tasks(["vidra_kit.celery_app"], related_name='tasks')
-
+    celery_app.autodiscover_tasks(["vidra_kit.celery_app"], related_name="tasks")
 
     return celery_app
 
@@ -62,7 +53,7 @@ def make_celery(env=None):
 
 # The default application instance used by the 'celery' command line tool
 # e.g., celery -A celery_app worker
-app = make_celery()
+# app = get_celery_app()
 
 # Explicitly create other environment apps for potential testing or explicit binding
 # These are optional, as the primary 'app' handles the environment determined by CELERY_CONFIG_ENV

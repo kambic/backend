@@ -1,6 +1,7 @@
 # celery_app/config/staging.py
 from .base import BaseConfig
 
+
 class Config(BaseConfig):
-    result_backend = "redis://localhost:6379/0"
-    broker_url = "redis://localhost:6379/1"
+    broker_url = "amqp://guest:guest@bpl-vidra-03.ts.telekom.si:5672/celery"
+    result_backend = "django-db"

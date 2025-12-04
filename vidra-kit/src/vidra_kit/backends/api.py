@@ -350,7 +350,7 @@ def fetch_rabbitmq_queues():
 
 import requests
 from typing import List, Dict, Optional, Any
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import json
 
 
@@ -385,6 +385,8 @@ class QueueInfo:
     consumers: int
     state: str
 
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
 
 @dataclass
 class BrokerStats:
@@ -392,6 +394,8 @@ class BrokerStats:
     total_messages: int
     total_consumers: int
 
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
 
 class RabbitMQMonitor:
     def __init__(self, broker_url: str):
@@ -415,6 +419,7 @@ class RabbitMQMonitor:
 
     def _get(self, endpoint: str, params=None) -> Dict:
         url = f"{self.api_base_url}{endpoint}"
+        logger.info(f'[API] getting RabbitMQ data from {url}')
         resp = self.session.get(url, params=params, timeout=10)
         resp.raise_for_status()
         return resp.json()
