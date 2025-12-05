@@ -1,8 +1,10 @@
+import logging
 import os
-import pprint
 import random
 from time import sleep
-from vidra_kit import logger
+
+logger = logging.getLogger("vidra_kit")
+logger.propagate = True  # keep default behavior
 from vidra_kit.celery_app import get_celery_app
 
 # app = get_celery_app('staging')
@@ -10,14 +12,6 @@ from vidra_kit.celery_app import get_celery_app
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 app = get_celery_app()
 
-# Set the default Django settings module for the 'celery' program.
-
-
-# Using a string here means the worker doesn't have to serialize
-# the configuration object to child processes.
-# - namespace='CELERY' means all celery-related configuration keys
-#   should have a `CELERY_` prefix.
-# app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()

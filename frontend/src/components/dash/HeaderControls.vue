@@ -19,6 +19,8 @@
 export default {
   props: ["manifestUrl"],
   emits: ["load", "reset"],
-  data: () => ({ url: "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd" }),
+  data: () => ({
+    url: "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd",
+  }),
 };
 </script>

@@ -1,10 +1,27 @@
-import { createWebHistory, createRouter } from 'vue-router';
-import routes from './routes';
+import { createRouter, createWebHistory } from "vue-router";
 
-const url = new URL(import.meta.env.BASE_URL, window.location.origin);
+import authRoutes from "./auth.router.js";
+import MainLayout from "../layouts/MainLayout.vue";
+import DashDashboard from "@/views/DashDashboard.vue";
+const routes = [
+  authRoutes,
+
+  {
+    path: "/",
+    component: MainLayout,
+    children: [
+      {
+        path: "dashboard",
+        name: "dashboard",
+        component: DashDashboard,
+      },
+    ],
+  },
+];
+
 const router = createRouter({
-        history: createWebHistory(url.pathname),
-	routes: routes,
+  history: createWebHistory(),
+  routes,
 });
 
 export default router;

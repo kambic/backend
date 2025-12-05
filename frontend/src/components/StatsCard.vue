@@ -26,25 +26,25 @@
 defineProps({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   value: {
     type: String,
-    required: true
+    required: true,
   },
   description: {
     type: String,
-    required: true
+    required: true,
   },
   iconPath: {
     type: String,
-    required: true
+    required: true,
   },
   color: {
     type: String,
-    default: 'primary'
-  }
-})
+    default: "primary",
+  },
+});
 </script>
 
 <style scoped>

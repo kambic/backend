@@ -2,14 +2,13 @@
 <!-- ChartsPanel.vue -->
 <!-- ================================================== -->
 <template>
-
-<div class="card bg-base-200">
-<div class="card-body">
-<h2 class="card-title text-lg">Playback Metrics</h2>
-<canvas ref="buf"></canvas>
-<canvas ref="br" class="mt-4"></canvas>
-</div>
-</div>
+  <div class="card bg-base-200">
+    <div class="card-body">
+      <h2 class="card-title text-lg">Playback Metrics</h2>
+      <canvas ref="buf"></canvas>
+      <canvas ref="br" class="mt-4"></canvas>
+    </div>
+  </div>
 </template>
 <script>
 import Chart from "chart.js/auto";

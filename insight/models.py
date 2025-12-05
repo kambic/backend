@@ -1,4 +1,7 @@
 # Create your models here.
+import json
+from datetime import datetime
+
 from django.db import models
 from django.utils import timezone
 
@@ -277,7 +280,6 @@ class SftpGo(models.Model):
             # Parse string and mark it as UTC
             utc_dt = datetime.fromisoformat(ts).replace(tzinfo=timezone.utc)
 
-            # Convert to your Django TIME_ZONE (Europe/Ljubljana)
             local_dt = dj_tz.localtime(utc_dt)
 
             data["date"] = local_dt

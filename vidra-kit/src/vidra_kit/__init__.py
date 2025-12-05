@@ -22,6 +22,7 @@ if get_logger:
             )
         ],
     )
+import logging
 
 logger = logging.getLogger("vidra_kit")
 logger.propagate = True  # keep default behavior

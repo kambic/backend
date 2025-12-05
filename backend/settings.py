@@ -128,6 +128,65 @@ STATIC_URL = "static/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "filters": {
+        # "special": {
+        #     "()": "project.logging.SpecialFilter",
+        #     "foo": "bar",
+        # },
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "mail_admins": {
+            "level": "ERROR",
+            "class": "django.utils.log.AdminEmailHandler",
+            "email_backend": "django.core.mail.backends.filebased.EmailBackend",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "propagate": True,
+        },
+        "werkzeug": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "django.request": {
+            "handlers": ["mail_admins"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "myproject.custom": {
+            "handlers": ["console", "mail_admins"],
+            "level": "INFO",
+            # "filters": ["special"],
+        },
+    },
+}
+
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",

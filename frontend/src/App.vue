@@ -1,16 +1,12 @@
-<script setup>
-import { RouterView } from "vue-router";
-import TheFooter from "@/components/TheFooter.vue";
-import TheHeader from "@/components/TheHeader.vue";
-</script>
-
 <template>
-  <TheHeader />
-
-  <main class="py-8">
-    <router-view />
-  </main>
-  <TheFooter />
+  <router-view />
 </template>
 
-<style scoped lang="scss"></style>
+<script setup></script>
+
+<style>
+html,
+body {
+  height: 100%;
+}
+</style>

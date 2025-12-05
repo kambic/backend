@@ -14,15 +14,17 @@ defineProps({
   title: String,
   value: String,
   desc: String,
-  color: { type: String, default: 'primary' }
-})
+  color: { type: String, default: "primary" },
+});
 
 const icons = {
-  chart: () => import('vue-tabler-icons').then(m => m.IconChartBar),
-  users: () => import('vue-tabler-icons').then(m => m.IconUsers),
-  dollar: () => import('vue-tabler-icons').then(m => m.IconCurrencyDollar),
-  trend: () => import('vue-tabler-icons').then(m => m.IconTrendingUp)
-}
+  chart: () => import("vue-tabler-icons").then((m) => m.IconChartBar),
+  users: () => import("vue-tabler-icons").then((m) => m.IconUsers),
+  dollar: () => import("vue-tabler-icons").then((m) => m.IconCurrencyDollar),
+  trend: () => import("vue-tabler-icons").then((m) => m.IconTrendingUp),
+};
 
-const iconComponent = defineAsyncComponent(() => icons[props.icon] || icons.chart)
+const iconComponent = defineAsyncComponent(
+  () => icons[props.icon] || icons.chart,
+);
 </script>

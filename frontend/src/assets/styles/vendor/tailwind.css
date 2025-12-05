@@ -8,15 +8,14 @@
  */
 @import "tailwindcss";
 
-
 /**
  * Overwrite the Tailwind CSS theme. Check docs for more information.
  */
 @theme {
-	/* --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; */
-	/* --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif; */
-	/* --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; */
-	/* ... */
+  /* --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; */
+  /* --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif; */
+  /* --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; */
+  /* ... */
 }
 
 /**
@@ -25,20 +24,20 @@
  * Docs: https://tailwindcss.com/docs/preflight
  */
 @layer base {
-	*,
-	::after,
-	::before,
-	::backdrop,
-	::file-selector-button {
-		/* ... */
-	}
-	body {
-		/* ... */
-	}
-	hr {
-		/* ... */
-	}
-	/* ... */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    /* ... */
+  }
+  body {
+    /* ... */
+  }
+  hr {
+    /* ... */
+  }
+  /* ... */
 }
 
 /**
@@ -46,24 +45,28 @@
  * Useful for defining styles for common components like headings, links, etc.
  */
 @layer components {
-	h1, .heading-1 {
-		@apply text-3xl mt-1 mb-4;
-	}
-	h2, .heading-2 {
-		@apply text-2xl mt-0.5 mb-4;
-	}
-	h3, .heading-3 {
-		@apply text-xl mt-0.5 mb-2;
-	}
-	h4, .heading-4 {
-		@apply text-lg mb-1;
-	}
-	a.link:hover {
-		@apply no-underline;
-	}
-	code {
-		@apply font-mono text-sm bg-neutral/5 p-1 rounded;
-	}
+  h1,
+  .heading-1 {
+    @apply text-3xl mt-1 mb-4;
+  }
+  h2,
+  .heading-2 {
+    @apply text-2xl mt-0.5 mb-4;
+  }
+  h3,
+  .heading-3 {
+    @apply text-xl mt-0.5 mb-2;
+  }
+  h4,
+  .heading-4 {
+    @apply text-lg mb-1;
+  }
+  a.link:hover {
+    @apply no-underline;
+  }
+  code {
+    @apply font-mono text-sm bg-neutral/5 p-1 rounded;
+  }
 }
 
 /**
@@ -71,8 +74,8 @@
  * Useful for defining custom utilities like `text-underline`, `text-italic`, etc.
  */
 @layer utilities {
-	/* @tailwind utilities; */
-	/* ... */
+  /* @tailwind utilities; */
+  /* ... */
 }
 
 /**

@@ -4,13 +4,15 @@
       <button
         @click="goBack"
         :disabled="!canGoBack"
-        class="btn btn-sm btn-outline">
+        class="btn btn-sm btn-outline"
+      >
         Back
       </button>
       <button
         @click="goForward"
         :disabled="!canGoForward"
-        class="btn btn-sm btn-outline">
+        class="btn btn-sm btn-outline"
+      >
         Forward
       </button>
       <button @click="refresh" class="btn btn-sm btn-primary">Refresh</button>

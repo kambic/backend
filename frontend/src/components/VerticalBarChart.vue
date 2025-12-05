@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { Bar } from 'vue-chartjs'
+import { Bar } from "vue-chartjs";
 import {
   Chart as ChartJS,
   Title,
@@ -18,25 +18,32 @@ import {
   Legend,
   BarElement,
   CategoryScale,
-  LinearScale
-} from 'chart.js'
+  LinearScale,
+} from "chart.js";
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+);
 
 const chartData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+  labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
   datasets: [
     {
-      label: 'Revenue ($K)',
+      label: "Revenue ($K)",
       data: [65, 78, 92, 88, 105, 120],
-      backgroundColor: 'rgba(99, 102, 241, 0.7)', // indigo-500 with opacity
-      borderColor: '#6366f1',
+      backgroundColor: "rgba(99, 102, 241, 0.7)", // indigo-500 with opacity
+      borderColor: "#6366f1",
       borderWidth: 2,
       borderRadius: 8,
-      borderSkipped: false
-    }
-  ]
-}
+      borderSkipped: false,
+    },
+  ],
+};
 
 const chartOptions = {
   responsive: true,
@@ -44,24 +51,24 @@ const chartOptions = {
   plugins: {
     legend: { display: false },
     tooltip: {
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      titleColor: '#fff',
-      bodyColor: '#fff',
-      cornerRadius: 8
-    }
+      backgroundColor: "rgba(0, 0, 0, 0.8)",
+      titleColor: "#fff",
+      bodyColor: "#fff",
+      cornerRadius: 8,
+    },
   },
   scales: {
     y: {
       beginAtZero: true,
       grid: { display: false },
-      ticks: { color: '#94a3b8' }
+      ticks: { color: "#94a3b8" },
     },
     x: {
       grid: { display: false },
-      ticks: { color: '#94a3b8' }
-    }
-  }
-}
+      ticks: { color: "#94a3b8" },
+    },
+  },
+};
 </script>
 
 <style scoped>
