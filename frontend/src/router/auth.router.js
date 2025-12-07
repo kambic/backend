@@ -1,21 +1,35 @@
-// src/router/auth.router.js
-import AuthLayout from "../layouts/AuthLayout.vue";
-import LoginPage from "../views/auth/LoginPage.vue";
-import RegisterPage from "../views/auth/RegisterPage.vue";
+import AuthLayout from '../layouts/AuthLayout.vue'
+import { LoginPage, LogoutPage, ProfilePage, RegisterPage } from '@/views/auth'
 
-export default {
-  path: "/auth",
+const routes = {
+  path: '/auth',
   component: AuthLayout,
   children: [
     {
-      path: "login",
-      name: "login",
+      path: '',
+      redirect: 'login',
+    },
+    {
+      path: 'login',
+      name: 'login',
       component: LoginPage,
     },
     {
-      path: "register",
-      name: "register",
+      path: 'register',
+      name: 'register',
       component: RegisterPage,
     },
+    {
+      path: 'profile',
+      name: 'profile',
+      component: ProfilePage,
+    },
+    {
+      path: 'logout',
+      name: 'logout',
+      component: LogoutPage,
+    },
   ],
-};
+}
+
+export { routes as AuthRoutes }

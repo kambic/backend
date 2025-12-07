@@ -1,0 +1,110 @@
+# ------------------------------------------------------------
+# STAGE 1: Build Python requirements layer
+# ------------------------------------------------------------
+FROM python:3.13-bookworm AS python-requirements
+
+ARG ENV_NAME=dev
+
+ENV VIRTUAL_ENV=/opt/venv
+ENV \
+    # This prevents Python from writing out pyc files \
+    PYTHONDONTWRITEBYTECODE=1 \
+    # This keeps Python from buffering stdin/stdout \
+    PYTHONUNBUFFERED=1 \
+    UV_PROJECT_ENVIRONMENT=$VIRTUAL_ENV
+
+RUN --mount=type=cache,target=/root/.cache/pip,id=alligator-pip \
+    set -ex \
+    && python3 -m venv $VIRTUAL_ENV \
+    && $VIRTUAL_ENV/bin/pip install -U setuptools wheel pip uv
+
+# Install Python packages
+COPY uv.lock pyproject.toml ./
+
+RUN --mount=type=cache,target=/root/.cache/uv,id=alligator-uv \
+    set -ex \
+    && if [ "$ENV_NAME" = "prod" ]; then \
+        $VIRTUAL_ENV/bin/uv sync --no-dev; \
+    else \
+        $VIRTUAL_ENV/bin/uv sync; \
+    fi
+
+
+# ------------------------------------------------------------
+# STAGE 2: Dev layer
+# ------------------------------------------------------------
+FROM python:3.13-slim-bookworm AS dev
+
+# Set the locale
+# libxml2-dev is needed for uwsgi in the production stage
+# mime-support install (/etc/mime.types) which is needded uWSGI to server static files with the correct mime types
+RUN --mount=type=cache,target=/var/cache/apt,id=alligator-apt \
+    --mount=type=cache,target=/var/lib/apt,id=alligator-apt \
+    apt update \
+    && apt install -yqq --no-install-recommends locales libxml2-dev mime-support \
+    && echo "LC_ALL=en_US.UTF-8" >> /etc/environment \
+    && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
+    && echo "LANG=en_US.UTF-8" > /etc/locale.conf \
+    && locale-gen en_US.UTF-8 \
+    && rm -rf /var/lib/apt/lists/* \
+    && echo "\nsource /srv/app/config/bash/bashrc" >> /root/.bashrc \
+    && echo "\nsource /opt/venv/bin/activate" >> /root/.bashrc
+
+ENV VIRTUAL_ENV=/opt/venv
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8 \
+    DJANGO_SETTINGS_MODULE=config.settings \
+    PYTHONPATH=/srv/app \
+    TERM=xterm-color \
+    PATH=$VIRTUAL_ENV/bin:${PATH}
+
+WORKDIR /srv/app
+
+COPY --from=python-requirements --chown=app:app $VIRTUAL_ENV $VIRTUAL_ENV
+
+EXPOSE 8000/tcp 8001/tcp
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+
+# ------------------------------------------------------------
+# STAGE 3: Javascript assets layer
+# ------------------------------------------------------------
+FROM node:24.8 AS js_assets
+
+WORKDIR /srv/app
+
+COPY package.json package-lock.json ./
+COPY src src
+
+# Install Node packages
+RUN --mount=type=cache,target=/root/.npm,id=alligator-npm \
+    npm ci \
+    && npm run build \
+    && ls -la public/static/dist/
+
+
+# ------------------------------------------------------------
+# STAGE 4: Prod
+# ------------------------------------------------------------
+
+FROM dev AS prod
+
+WORKDIR /srv/app
+
+RUN set -ex \
+    && groupadd -r app --gid=1000 && useradd --uid=1000 --create-home --home-dir=/home/app --no-log-init -r -g app app \
+    && echo "\nsource ./config/bash/bashrc" >> /home/app/.bashrc \
+    && echo "\nsource /opt/venv/bin/activate" >> /home/app/.bashrc
+
+COPY --chown=app:app . .
+
+USER app
+
+# The app user doesn't have permissions to create collected_static on some systems, so we create it here
+RUN mkdir -p /srv/app/collected_static && chown -R app:app /srv/app/collected_static
+
+COPY --from=js_assets --chown=app:app /srv/app/public/static/ ./collected_static
+
+CMD ["uwsgi", "--ini", "config/uwsgi.ini", "--http", "0.0.0.0:8080"]

@@ -1,12 +1,10 @@
+<script setup>
+import { RouterView } from 'vue-router'
+import Layout from './layouts/Layout.vue'
+</script>
+
 <template>
-  <router-view />
+  <RouterView />
 </template>
 
-<script setup></script>
-
-<style>
-html,
-body {
-  height: 100%;
-}
-</style>
+<style scoped></style>

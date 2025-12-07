@@ -1,3 +1,12 @@
 [submodule "vidra-kit"]
 	path = vidra-kit
 	url = git@gitlab.telekom.si:vidra/vidra-kit.git
+[submodule "frontend/deploy"]
+	path = frontend/deploy
+	url = https://github.com/YPCrumble/ansible-django-stack.git
+[submodule "deploy"]
+	path = deploy
+	url = https://github.com/YPCrumble/ansible-django-stack.git
+[submodule "ansible-django-stack"]
+	path = ansible-django-stack
+	url = https://github.com/YPCrumble/ansible-django-stack.git

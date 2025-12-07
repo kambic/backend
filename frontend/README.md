@@ -1,74 +1,44 @@
-# Template: Vite + Vue 3 + Sass + Tailwind 4 + DaisyUI 5
-![Starter template: Vite + Vue 3 + Sass + Tailwind 4 + DaisyUI 5](https://tpl-vue3-tailwind4-daisyui5.brown.sk/template-image.png)
+# frontend
 
-This template should help get you started developing with Vue 3 in Vite. The template is based on the [Vite + Vue 3 template](https://vite.new/vue), but with some additional features:
+This template should help get you started developing with Vue 3 in Vite.
 
-- ✅ [Vite](https://vite.dev/) for the build tool
-- ✅ [Vue 3](https://vuejs.org/) for the frontend
-- ✅ [Vue Router 4](https://router.vuejs.org/) for routing
-- ✅ [Sass](https://sass-lang.com/) for styling
-- ✅ [Tailwind CSS 4](https://tailwindcss.com/) for styling
-- ✅ [DaisyUI 5](https://daisyui.com/) for additional Tailwind CSS components
-- ✅ [PostCSS](https://postcss.org/) for transforming CSS with JS plugins
-- ✅ **Theme configuration** (light, dark, ...)
-- ✅ **UI blocks (components)** pre-configured with DaisyUI
+## Recommended IDE Setup
 
-### Demo
-- 🌐 [https://tpl-vue3-tailwind4-daisyui5.brown.sk/](https://tpl-vue3-tailwind4-daisyui5.brown.sk/)
+[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-### Template initialization by forking (recommended) 🍴
-⏩ Use github's template feature to create a new repository based on this template:
+## Recommended Browser Setup
 
-→ [Create a repository from this template](https://github.com/new?template_name=starter-template-vite-vue3-sass-tailwind4-daisyui5&template_owner=martinille) ←
+- Chromium-based browsers (Chrome, Edge, Brave, etc.):
+  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
+  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
+- Firefox:
+  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
+  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
 
-### Template initialization by cloning
-⏩ Clone the repository: 
-```bash
-git clone https://github.com/martinille/starter-template-vite-vue3-sass-tailwind4-daisyui5.git <project-name>
-```
+## Customize configuration
 
-⏩ Change the directory:
-```bash
-cd <project-name>
-```
+See [Vite Configuration Reference](https://vite.dev/config/).
 
-⏩ Remove the `.git` directory: 
-```bash
-rm -rf .git
-```
+## Project Setup
 
-⏩ Install the dependencies: 
-```bash
+```sh
 npm install
 ```
 
-### Development
-- ⏩ Run the Vite development server with HMR: `npm run dev`
+### Compile and Hot-Reload for Development
 
-### Production
-- ⏩ Build the project: `npm run build`
+```sh
+npm run dev
+```
 
-### Folder structure
-- 📁 `public/` - Static files
-- 📁 `src/` - Source files
-  - 📁 `assets/` - Static assets
-    - 📁 `images/` - Images
-    - 📁 `styles/` - Styles
-        - 📁 `vendor/` - Vendor styles (Tailwind CSS, DaisyUI)
-  - 📁 `components/` - Vue components
-  - 📁 `router/` - Vue Router configuration
-  - 📁 `views/` - Vue views
-  - 📄 `App.vue` - Root component
-  - 📄 `main.js` - Entry point
+### Compile and Minify for Production
 
-### GitHub Pages
+```sh
+npm run build
+```
 
-The template includes a GitHub workflow for deployment to GitHub Pages. To enable GitHub Pages:
+### Lint with [ESLint](https://eslint.org/)
 
-1. Visit your repository's Settings
-2. Select the Pages section
-3. In the "Build and deployment" area, set the source to "GitHub Actions"
-
-### TODO
-- [ ] 🕘 Add unit tests
-- [ ] 🕘 Minimal template (no additional features)
+```sh
+npm run lint
+```

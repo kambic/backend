@@ -1,0 +1,19 @@
+**/.venv
+*console.log
+.coverage
+.env
+.idea/
+.mypy_cache/**/*
+.pytest_cache/**/*
+.ruff_cache/**/*
+collected_static/
+db.sqlite
+docs_site/
+htmlcov
+latest.dump
+node_modules
+public/static/dist
+
+# Claude Code settings
+.claude/
+CLAUDE.local.md

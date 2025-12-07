@@ -1,0 +1,36 @@
+{
+  "name": "alligator",
+  "description": "Django Base Site",
+  "scripts": {
+    "dev": "npx vite --config src/config/vite.config.mjs",
+    "build": "npx vite build --config src/config/vite.config.mjs",
+    "preview": "npx vite preview --config src/config/vite.config.mjs",
+    "lint-sass": "npx stylelint --config src/config/stylelint.config.js ./src/scss/",
+    "format-sass": "npx stylelint --config src/config/stylelint.config.js --fix 'src/**/*.{css,scss}'",
+    "lint-js": "npx eslint --config src/config/eslint.config.js ./src/",
+    "format-js": "npx eslint --config src/config/eslint.config.js --fix ./src/"
+  },
+  "devDependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.8",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.32.0",
+    "sass": "~1.92",
+    "stylelint": "^16.24.0",
+    "stylelint-config-recess-order": "^7.3.0",
+    "stylelint-config-standard-scss": "^16.0.0",
+    "stylelint-scss": "^6.12.1",
+    "vite": "^7.1.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TS/alligator.git"
+  },
+  "author": "Brent O'Connor",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TS/alligator/issues"
+  },
+  "homepage": "https://github.com/TS/alligator#readme"
+}

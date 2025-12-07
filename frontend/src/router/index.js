@@ -1,27 +1,19 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory } from 'vue-router'
 
-import authRoutes from "./auth.router.js";
-import MainLayout from "../layouts/MainLayout.vue";
-import DashDashboard from "@/views/DashDashboard.vue";
+import UiShowdownView from '@/views/samples/UiShowdownView.vue'
+import { AuthRoutes } from './auth.router.js'
+import { Layout, MainLayout } from '@/layouts/index.js'
+import { PageRoutes } from '@/router/pages.router.js'
+
 const routes = [
-  authRoutes,
+  { path: '/ui', component: Layout, children: [{ path: '', component: UiShowdownView }] },
+  { path: '/main', component: MainLayout, children: [{ path: '', component: UiShowdownView }] },
+  AuthRoutes,
+  PageRoutes,
+]
 
-  {
-    path: "/",
-    component: MainLayout,
-    children: [
-      {
-        path: "dashboard",
-        name: "dashboard",
-        component: DashDashboard,
-      },
-    ],
-  },
-];
-
-const router = createRouter({
+export const router = createRouter({
   history: createWebHistory(),
   routes,
-});
-
-export default router;
+})
+export default router
