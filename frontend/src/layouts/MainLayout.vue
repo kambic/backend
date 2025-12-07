@@ -8,7 +8,7 @@ const auth = useAuthStore()
 </script>
 
 <template>
-  <div class="flex min-h-screen">
+  <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] min-h-screen">
     <AppSidebar />
     <main class="flex-1 p-8 bg-base-100">
       <slot />

@@ -24,29 +24,21 @@ const auth = useAuthStore()
 <template>
   <aside class="bg-base-200 relative h-screen">
     <!-- Top -->
-    <div class="flex items-center justify-between mb-6">
-      <div class="font-bold text-xl truncate" v-if="!ui.collapsed">⚡ MyPanel</div>
-
-      <!-- collapse button -->
-      <button class="btn btn-sm btn-ghost" @click="ui.toggleSidebar">
-        <span v-if="ui.collapsed">➡</span>
-        <span v-else>⬅</span>
-      </button>
-    </div>
-    <!-- Toggle Button (Mobile + Desktop) -->
-    <label
-      class="absolute top-4 left-4 z-10 btn btn-square btn-ghost swap swap-rotate md:hidden"
-      :class="{ 'swap-active': ui.collapsed }"
-    >
-      <input type="checkbox" v-model="ui.collapsed" />
-      <Bars3Icon class="swap-off h-6 w-6" />
-      <XMarkIcon class="swap-on h-6 w-6" />
-    </label>
 
     <div
       class="flex flex-col h-full transition-all duration-300 overflow-hidden"
       :class="ui.collapsed ? 'w-20' : 'w-64'"
     >
+      <div class="flex items-center justify-between mb-1 border-b border-base-300">
+        <div class="font-bold text-xl truncate" v-if="!ui.collapsed">⚡ MyPanel</div>
+
+        <!-- collapse button -->
+        <button class="btn btn-sm btn-ghost" @click="ui.toggleSidebar">
+          <span v-if="ui.collapsed">➡</span>
+          <span v-else>⬅</span>
+        </button>
+      </div>
+
       <!-- Logo / Header -->
       <div class="flex items-center justify-center h-16 border-b border-base-300">
         <h1 class="text-2xl font-bold" :class="{ hidden: ui.collapsed }">MyApp</h1>
