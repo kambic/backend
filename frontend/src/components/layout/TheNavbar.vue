@@ -1,6 +1,8 @@
 <template>
   <div class="navbar bg-base-100 shadow-xl rounded-box">
     <div class="flex-1">
+      <ThemeToggle />
+
       <RouterLink to="/simple" class="btn btn-ghost normal-case text-xl">My Blog</RouterLink>
     </div>
     <div class="flex-none">
@@ -13,7 +15,7 @@
       <div class="dropdown dropdown-end">
         <label tabindex="0" class="btn btn-ghost btn-circle avatar">
           <div class="w-10 rounded-full">
-            <img src="https://api.lorem.space/image/face?hash=33791" />
+            <img src="/avatar.png" />
           </div>
         </label>
         <ul
@@ -33,3 +35,6 @@
     </div>
   </div>
 </template>
+<script setup lang="ts">
+import ThemeToggle from '@//components/theme/ThemeToggle.vue'
+</script>

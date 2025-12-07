@@ -1,3 +1,9 @@
 @import "tailwindcss";
 
 @plugin "daisyui";
+
+@plugin "daisyui" {
+      themes: all;
+  root: ":root";
+  logs: true;
+}

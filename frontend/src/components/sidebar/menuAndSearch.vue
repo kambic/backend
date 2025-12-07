@@ -2,7 +2,7 @@
 
 <template>
   <div class="flex">
-    <aside class="h-screen sticky top-0 flex flex-col bg-base-200 overflow-y-auto">
+    <aside class="h-screen sticky top-0 flex flex-col bg-base-300">
       <!-- Header -->
       <div class="flex justify-between p-2">
         <!-- Logo -->

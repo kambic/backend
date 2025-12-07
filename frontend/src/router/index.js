@@ -7,7 +7,7 @@ import { PageRoutes } from '@/router/pages.router.js'
 
 const routes = [
   { path: '/ui', component: Layout, children: [{ path: '', component: UiShowdownView }] },
-  { path: '/main', component: MainLayout, children: [{ path: '', component: UiShowdownView }] },
+  { path: '/main', component: Layout, children: [{ path: '', component: UiShowdownView }] },
   AuthRoutes,
   PageRoutes,
 ]
